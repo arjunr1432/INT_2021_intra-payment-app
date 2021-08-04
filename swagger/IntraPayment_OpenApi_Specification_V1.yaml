@@ -1,0 +1,290 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Master Card Assignment
+  description: "APIs to handle Modern Bank PLC's internal account transactions."
+servers:
+  - url: 'http://localhost:8080/payment-app/v1'
+tags:
+  - name: "Account Services"
+    description: "APIs to handle Account information and Balance related operations."
+  - name: "Payment Services"
+    description: "APIs to handle Payment transfer related operations."
+paths:
+  /accounts:
+    get:
+      summary: 'This API will return the complete account details, including new and deleted accounts.'
+      tags:
+        - "Account Services"
+      responses:
+        '200':
+          description: 'Successful response: List of all the accounts.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDetailsResponse'
+          headers:
+            reference_id:
+              description: "Unique reference ID to track the request execution."
+              schema:
+                type: string
+                format: UUID
+  /accounts/{account_id}/balance:
+    get:
+      summary: 'This API will return the balance details of a particular account.'
+      tags:
+        - "Account Services"
+      parameters:
+        - name: account_id
+          in: path
+          required: true
+          description: Unique id associated with each accounts.
+          example: 111
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Successful response: Balance details a particular account.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountBalanceResponse'
+          headers:
+            reference_id:
+              description: "Unique reference ID to track the request execution."
+              schema:
+                type: string
+                format: UUID
+        '400':
+          description: 'Failed response: Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Failed response: Account details not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /accounts/{account_id}/statements/mini:
+    get:
+      summary: 'This API will return a mini statement of most recent 20 transactions of a particular account.'
+      tags:
+        - "Account Services"
+      parameters:
+        - name: account_id
+          in: path
+          required: true
+          description: Unique id associated with each accounts.
+          example: 111
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Successful response: Balance details a a particular account.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountStatementResponse'
+          headers:
+            reference_id:
+              description: "Unique reference ID to track the request execution."
+              schema:
+                type: string
+                format: UUID
+        '400':
+          description: 'Failed response: Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 'Failed response: Account details not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /payments/transfer:
+    post:
+      summary: 'This API will transfer money from one account to other.'
+      tags:
+        - "Payment Services"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentTransferRequest'
+        description: Request payload for adding a new element to the existing Array.
+        required: true
+      responses:
+        '200':
+          description: 'Successful response: Payment transfer completed.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentTransferResponse'
+          headers:
+            reference_id:
+              description: "Unique reference ID to track the request execution."
+              schema:
+                type: string
+                format: UUID
+        '400':
+          description: 'Failed response: Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    AccountDetailsResponse:
+      type: array
+      items:
+        type: object
+        required:
+          - account_id
+          - currency
+          - balance
+          - account_status
+        properties:
+          account_id:
+            type: integer
+            format: int64
+            example: 111
+          currency:
+            type: string
+            enum:
+              - GBP
+              - NOK
+              - EUR
+            example: GBP
+          balance:
+            type: string
+            example: "100.00"
+            pattern: '^[0-9]+\.[0-9]{2}$'
+          account_status:
+            type: string
+            enum:
+              - ACTIVE
+              - DELETED
+            example: "ACTIVE"
+
+    AccountBalanceResponse:
+      type: object
+      required:
+        - account_id
+        - currency
+        - balance
+      properties:
+        account_id:
+          type: integer
+          format: int64
+          example: 111
+        currency:
+          type: string
+          enum:
+            - GBP
+            - NOK
+            - EUR
+          example: GBP
+        balance:
+          type: string
+          example: "99.00"
+          pattern: '^[0-9]+\.[0-9]{2}$'
+
+    AccountStatementResponse:
+      type: array
+      items:
+        type: object
+        required:
+          - account_id
+          - currency
+          - amount
+          - type
+          - transaction_date
+        properties:
+          account_id:
+            type: integer
+            format: int64
+            example: 111
+          currency:
+            type: string
+            enum:
+              - GBP
+              - NOK
+              - EUR
+            example: GBP
+          amount:
+            type: string
+            example: "100.00"
+            pattern: '^[0-9]+\.[0-9]{2}$'
+          type:
+            type: string
+            enum:
+              - DEBIT
+              - CREDIT
+            example: "DEBIT"
+          transaction_date:
+            type: string
+            example: "2021-08-05T12:30:10Z"
+    PaymentTransferRequest:
+      type: object
+      required:
+        - sender_account_id
+        - receiver_account_id
+        - amount
+      properties:
+        sender_account_id:
+          type: integer
+          format: int64
+          example: 111
+        receiver_account_id:
+          type: integer
+          format: int64
+          example: 222
+        amount:
+          type: string
+          example: "100.00"
+          pattern: '^[0-9]+\.[0-9]{2}$'
+    PaymentTransferResponse:
+      type: object
+      required:
+        - status
+        - sender_account_id
+        - receiver_account_id
+        - amount
+      properties:
+        status:
+          type: string
+          example: "Transfer Success"
+        sender_account_id:
+          type: integer
+          format: int64
+          example: 111
+        receiver_account_id:
+          type: integer
+          format: int64
+          example: 222
+        amount:
+          type: string
+          example: "100.00"
+          pattern: '^[0-9]+\.[0-9]{2}$'
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+security:
+  - BasicAuth: []
