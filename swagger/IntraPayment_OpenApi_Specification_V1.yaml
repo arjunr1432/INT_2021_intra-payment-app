@@ -4,14 +4,14 @@ info:
   title: Master Card Assignment
   description: "APIs to handle Modern Bank PLC's internal account transactions."
 servers:
-  - url: 'http://localhost:8080/payment-app/v1'
+  - url: 'http://localhost:8080/payment-app'
 tags:
   - name: "Account Services"
     description: "APIs to handle Account information and Balance related operations."
   - name: "Payment Services"
     description: "APIs to handle Payment transfer related operations."
 paths:
-  /accounts:
+  /v1/accounts:
     get:
       summary: 'This API will return the complete account details, including new and deleted accounts.'
       tags:
@@ -24,12 +24,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/AccountDetailsResponse'
           headers:
-            reference_id:
+            Reference-Id:
               description: "Unique reference ID to track the request execution."
               schema:
                 type: string
                 format: UUID
-  /accounts/{account_id}/balance:
+  /v1/accounts/{account_id}/balance:
     get:
       summary: 'This API will return the balance details of a particular account.'
       tags:
@@ -50,7 +50,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AccountBalanceResponse'
           headers:
-            reference_id:
+            Reference-Id:
               description: "Unique reference ID to track the request execution."
               schema:
                 type: string
@@ -67,7 +67,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /accounts/{account_id}/statements/mini:
+  /v1/accounts/{account_id}/statements/mini:
     get:
       summary: 'This API will return a mini statement of most recent 20 transactions of a particular account.'
       tags:
@@ -88,7 +88,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AccountStatementResponse'
           headers:
-            reference_id:
+            Reference-Id:
               description: "Unique reference ID to track the request execution."
               schema:
                 type: string
@@ -105,11 +105,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /payments/transfer:
+  /v1/payments/transfer:
     post:
       summary: 'This API will transfer money from one account to other.'
       tags:
         - "Payment Services"
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: Unique identifier for idempotency
+          example: 49ae0cfe-6b72-4310-81f5-ad4eef897fe3
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -125,7 +133,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaymentTransferResponse'
           headers:
-            reference_id:
+            Reference-Id:
               description: "Unique reference ID to track the request execution."
               schema:
                 type: string

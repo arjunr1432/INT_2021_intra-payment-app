@@ -1,9 +1,7 @@
 package com.mc.ibpts.paymentapp.service;
 
-import com.mc.ibpts.paymentapp.common.gen.api.AccountsApiDelegate;
-import com.mc.ibpts.paymentapp.common.gen.model.AccountBalanceResponse;
-import com.mc.ibpts.paymentapp.common.gen.model.AccountDetailsResponseData;
-import com.mc.ibpts.paymentapp.common.gen.model.AccountStatementResponseData;
+import com.mc.ibpts.paymentapp.common.gen.api.V1ApiDelegate;
+import com.mc.ibpts.paymentapp.common.gen.model.*;
 import com.mc.ibpts.paymentapp.dvo.TransactionInfo;
 import com.mc.ibpts.paymentapp.exception.CustomBusinessException;
 import com.mc.ibpts.paymentapp.repository.RepositoryService;
@@ -21,12 +19,12 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class AccountsService implements AccountsApiDelegate {
+public class AccountsV1Service implements V1ApiDelegate {
 
     @Autowired
     private RepositoryService embeddedRepositoryService;
 
-    public ResponseEntity<AccountBalanceResponse> accountsAccountIdBalanceGet(String accountId) {
+    public ResponseEntity<AccountBalanceResponse> v1AccountsAccountIdBalanceGet(String accountId) {
         AtomicReference<AccountBalanceResponse> accountBalanceResponse = new AtomicReference<>();
         embeddedRepositoryService.fetchAccountInfo(Long.valueOf(accountId)).ifPresentOrElse(
                 (accountInfo) -> {
@@ -43,10 +41,10 @@ public class AccountsService implements AccountsApiDelegate {
         );
         log.info("Successfully retrieved account balance details for account_id={}", accountId);
         return new ResponseEntity<AccountBalanceResponse>(accountBalanceResponse.get(), HttpStatus.OK);
-
     }
 
-    public ResponseEntity<List<AccountStatementResponseData>> accountsAccountIdStatementsMiniGet(String accountId) {
+
+    public ResponseEntity<List<AccountStatementResponseData>> v1AccountsAccountIdStatementsMiniGet(String accountId) {
         AtomicReference<List<AccountStatementResponseData>> statementResponseData = new AtomicReference<>();
         embeddedRepositoryService.fetchAccountInfo(Long.valueOf(accountId)).ifPresentOrElse(
                 (accountInfo) -> {
@@ -81,10 +79,18 @@ public class AccountsService implements AccountsApiDelegate {
     }
 
 
-    public ResponseEntity<List<AccountDetailsResponseData>> accountsGet() {
+    public ResponseEntity<List<AccountDetailsResponseData>> v1AccountsGet() {
         List<AccountDetailsResponseData> accountDetailsResponseData = embeddedRepositoryService.fetchAllAccountInfo()
                 .stream().map(RequestResponseMapper.ACCOUNT_INFO_TO_ACCOUNT_DETAILS_RESPONSE).collect(Collectors.toList());
         log.info("Successfully retrieved account details with {} no of records.", accountDetailsResponseData.size());
         return new ResponseEntity<>(accountDetailsResponseData, HttpStatus.OK);
+    }
+
+
+    public ResponseEntity<PaymentTransferResponse> v1PaymentsTransferPost(
+            String idempotencyKey, PaymentTransferRequest paymentTransferRequest) {
+
+
+        return null;
     }
 }
