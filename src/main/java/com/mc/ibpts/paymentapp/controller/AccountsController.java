@@ -8,15 +8,19 @@ import com.mc.ibpts.paymentapp.common.gen.model.AccountStatementResponseData;
 import com.mc.ibpts.paymentapp.common.gen.model.ErrorResponse;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
+@RequestMapping(path = "/v1")
 public class AccountsController implements AccountsApi {
 
     private final AccountsApiDelegate accountsService;
@@ -42,6 +46,7 @@ public class AccountsController implements AccountsApi {
             produces = { "application/json" }
     )
     public ResponseEntity<AccountBalanceResponse> accountsAccountIdBalanceGet(@ApiParam(value = "Unique id associated with each accounts.",required=true) @PathVariable("account_id") String accountId) {
+        log.info("Request received to fetch account balance details for account_id={}", accountId);
         return accountsService.accountsAccountIdBalanceGet(accountId);
     }
 
@@ -67,6 +72,7 @@ public class AccountsController implements AccountsApi {
             produces = { "application/json" }
     )
     public ResponseEntity<List<AccountStatementResponseData>> accountsAccountIdStatementsMiniGet(@ApiParam(value = "Unique id associated with each accounts.",required=true) @PathVariable("account_id") String accountId) {
+        log.info("Request received to fetch account mini statement details for account_id={}", accountId);
         return accountsService.accountsAccountIdStatementsMiniGet(accountId);
     }
 
@@ -87,6 +93,7 @@ public class AccountsController implements AccountsApi {
             produces = { "application/json" }
     )
     public ResponseEntity<List<AccountDetailsResponseData>> accountsGet() {
+        log.info("Request received to fetch all account details");
         return accountsService.accountsGet();
     }
 
