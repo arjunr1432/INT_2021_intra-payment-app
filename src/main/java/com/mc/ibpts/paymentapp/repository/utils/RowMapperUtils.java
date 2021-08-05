@@ -22,7 +22,7 @@ public class RowMapperUtils {
         TransactionInfo transactionInfo = new TransactionInfo();
         transactionInfo.setSenderAccountId(resultSet.getLong("sender_account_id"));
         transactionInfo.setReceiverAccountId(resultSet.getLong("receiver_account_id"));
-        transactionInfo.setAmount(resultSet.getDouble("amount"));
+        transactionInfo.setAmount(resultSet.getBigDecimal("amount"));
         transactionInfo.setCurrency(resultSet.getString("currency"));
         transactionInfo.setTransactionDate(
                 LocalDateTime.ofInstant(resultSet.getTimestamp("transaction_date").toInstant(),

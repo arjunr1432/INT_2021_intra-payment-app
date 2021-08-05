@@ -32,18 +32,20 @@ public class RepositoryServiceUtils {
             log.error(DATABASE_ERROR_LOG_TRACE_MESSAGE, e.getMessage());
             throw new CustomBusinessException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    DATABASE_ERROR_RESPONSE_MESSAGE);
+                    DATABASE_ERROR_RESPONSE_MESSAGE,
+                    e);
         }
     }
 
-    protected int update(String sql, SqlParameterSource sqlParameterSource) {
+    protected int upsert(String sql, SqlParameterSource sqlParameterSource) {
         try {
             return namedParameterJdbcTemplate.update(sql, sqlParameterSource);
         } catch (Exception e) {
             log.error(DATABASE_ERROR_LOG_TRACE_MESSAGE, e.getMessage());
             throw new CustomBusinessException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    DATABASE_ERROR_RESPONSE_MESSAGE);
+                    DATABASE_ERROR_RESPONSE_MESSAGE,
+                    e);
         }
     }
 
@@ -58,7 +60,8 @@ public class RepositoryServiceUtils {
             log.error(DATABASE_ERROR_LOG_TRACE_MESSAGE, e.getMessage());
             throw new CustomBusinessException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    DATABASE_ERROR_RESPONSE_MESSAGE);
+                    DATABASE_ERROR_RESPONSE_MESSAGE,
+                    e);
         }
     }
 
@@ -70,7 +73,8 @@ public class RepositoryServiceUtils {
             log.error(DATABASE_ERROR_LOG_TRACE_MESSAGE, e.getMessage());
             throw new CustomBusinessException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    DATABASE_ERROR_RESPONSE_MESSAGE);
+                    DATABASE_ERROR_RESPONSE_MESSAGE,
+                    e);
         }
     }
 }

@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AccountsV1Controller implements V1Api {
 
-    private final V1ApiDelegate accountsService;
+    private final V1ApiDelegate accountsV1Service;
 
     /**
      * GET /v1/accounts/{account_id}/balance : This API will return the balance details of a particular account.
@@ -41,7 +41,7 @@ public class AccountsV1Controller implements V1Api {
     )
     public ResponseEntity<AccountBalanceResponse> v1AccountsAccountIdBalanceGet(@ApiParam(value = "Unique id associated with each accounts.",required=true) @PathVariable("account_id") String accountId) {
         log.info("Request received to fetch account balance details for account_id={}", accountId);
-        return accountsService.v1AccountsAccountIdBalanceGet(accountId);
+        return accountsV1Service.v1AccountsAccountIdBalanceGet(accountId);
     }
 
 
@@ -67,7 +67,7 @@ public class AccountsV1Controller implements V1Api {
     )
     public ResponseEntity<List<AccountStatementResponseData>> v1AccountsAccountIdStatementsMiniGet(@ApiParam(value = "Unique id associated with each accounts.",required=true) @PathVariable("account_id") String accountId) {
         log.info("Request received to fetch account mini statement details for account_id={}", accountId);
-        return accountsService.v1AccountsAccountIdStatementsMiniGet(accountId);
+        return accountsV1Service.v1AccountsAccountIdStatementsMiniGet(accountId);
     }
 
 
@@ -88,7 +88,7 @@ public class AccountsV1Controller implements V1Api {
     )
     public ResponseEntity<List<AccountDetailsResponseData>> v1AccountsGet() {
         log.info("Request received to fetch all account details");
-        return accountsService.v1AccountsGet();
+        return accountsV1Service.v1AccountsGet();
     }
 
 
@@ -113,7 +113,11 @@ public class AccountsV1Controller implements V1Api {
             consumes = { "application/json" }
     )
     public ResponseEntity<PaymentTransferResponse> v1PaymentsTransferPost(@ApiParam(value = "Unique identifier for idempotency" ,required=true) @RequestHeader(value="Idempotency-Key", required=true) String idempotencyKey,@ApiParam(value = "Request payload for adding a new element to the existing Array." ,required=true )  @Valid @RequestBody PaymentTransferRequest paymentTransferRequest) {
-        return getDelegate().v1PaymentsTransferPost(idempotencyKey, paymentTransferRequest);
+        log.info("Request received to transfer money fromAccountId={} to toAccountId={} with amount={}",
+                paymentTransferRequest.getSenderAccountId(),
+                paymentTransferRequest.getReceiverAccountId(),
+                paymentTransferRequest.getAmount());
+        return accountsV1Service.v1PaymentsTransferPost(idempotencyKey, paymentTransferRequest);
     }
 
 }
