@@ -7,16 +7,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
-public class RepositoryServiceUtils {
+public class SQLRepositoryServiceUtils {
     private static final String DATABASE_ERROR_LOG_TRACE_MESSAGE = "Unknown exception happened while accessing database resource, error={}";
     private static final String DATABASE_ERROR_RESPONSE_MESSAGE = "Something went wrong, please try again or contact our support team.";
 

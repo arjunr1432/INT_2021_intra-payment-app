@@ -3,12 +3,17 @@ package com.mc.ibpts.paymentapp;
 import com.mc.ibpts.paymentapp.common.gen.model.PaymentTransferRequest;
 import com.mc.ibpts.paymentapp.dvo.AccountInfo;
 import com.mc.ibpts.paymentapp.dvo.TransactionInfo;
+import org.ehcache.Cache;
+import org.ehcache.config.CacheRuntimeConfiguration;
+import org.ehcache.spi.loaderwriter.BulkCacheLoadingException;
+import org.ehcache.spi.loaderwriter.BulkCacheWritingException;
+import org.ehcache.spi.loaderwriter.CacheLoadingException;
+import org.ehcache.spi.loaderwriter.CacheWritingException;
+import org.hamcrest.internal.ArrayIterator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class TestSupportUtils {
 
@@ -112,4 +117,76 @@ public class TestSupportUtils {
         paymentTransferRequest.setAmount("100.00");
         return paymentTransferRequest;
     }
+
+    public static Cache MOCKED_CACHE = new Cache() {
+        @Override
+        public Iterator iterator() {
+            return new ArrayIterator(getAccountInfoList());
+        }
+
+        @Override
+        public Object get(Object o) throws CacheLoadingException {
+            return getOptionalAccountInfo().get();
+        }
+
+        @Override
+        public void put(Object o, Object o2) throws CacheWritingException {
+
+        }
+
+        @Override
+        public boolean containsKey(Object o) {
+            return o.equals(1234) ? true : false;
+        }
+
+        @Override
+        public void remove(Object o) throws CacheWritingException {
+
+        }
+
+        @Override
+        public Map getAll(Set set) throws BulkCacheLoadingException {
+            return null;
+        }
+
+        @Override
+        public void putAll(Map map) throws BulkCacheWritingException {
+
+        }
+
+        @Override
+        public void removeAll(Set set) throws BulkCacheWritingException {
+
+        }
+
+        @Override
+        public void clear() {
+
+        }
+
+        @Override
+        public Object putIfAbsent(Object o, Object o2) throws CacheLoadingException, CacheWritingException {
+            return null;
+        }
+
+        @Override
+        public boolean remove(Object o, Object o2) throws CacheWritingException {
+            return false;
+        }
+
+        @Override
+        public Object replace(Object o, Object o2) throws CacheLoadingException, CacheWritingException {
+            return null;
+        }
+
+        @Override
+        public boolean replace(Object o, Object o2, Object v1) throws CacheLoadingException, CacheWritingException {
+            return false;
+        }
+
+        @Override
+        public CacheRuntimeConfiguration getRuntimeConfiguration() {
+            return null;
+        }
+    };
 }

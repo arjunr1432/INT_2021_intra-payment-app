@@ -4,13 +4,11 @@ import com.mc.ibpts.paymentapp.TestSupportUtils;
 import com.mc.ibpts.paymentapp.dvo.AccountInfo;
 import com.mc.ibpts.paymentapp.dvo.TransactionInfo;
 import com.mc.ibpts.paymentapp.exception.CustomBusinessException;
-import com.mc.ibpts.paymentapp.service.AccountsV1Service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
@@ -23,18 +21,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.mc.ibpts.paymentapp.repository.EmbeddedRepositoryService.*;
+import static com.mc.ibpts.paymentapp.repository.EmbeddedSQLRepositoryServiceImpl.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class EmbeddedRepositoryServiceTest {
+class EmbeddedRepositoryServiceImplTest {
 
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private EmbeddedRepositoryService embeddedRepositoryService;
+    private EmbeddedSQLRepositoryServiceImpl embeddedRepositoryServiceImpl;
 
     @BeforeAll
     public void init() {
         namedParameterJdbcTemplate = Mockito.mock(NamedParameterJdbcTemplate.class);
-        embeddedRepositoryService = new EmbeddedRepositoryService(namedParameterJdbcTemplate);
+        embeddedRepositoryServiceImpl = new EmbeddedSQLRepositoryServiceImpl(namedParameterJdbcTemplate);
     }
 
     @Test
@@ -44,7 +42,7 @@ class EmbeddedRepositoryServiceTest {
                 Mockito.any(SqlParameterSource.class),
                 Mockito.any(RowMapper.class)))
                 .thenReturn(Collections.singletonList(TestSupportUtils.getOptionalAccountInfo().get()));
-        Optional<AccountInfo> accountInfo = embeddedRepositoryService.fetchAccountInfo(1234L);
+        Optional<AccountInfo> accountInfo = embeddedRepositoryServiceImpl.fetchAccountInfo(1234L);
         Assertions.assertFalse(accountInfo.isEmpty());
         Assertions.assertEquals(1234L, accountInfo.get().getAccountId());
     }
@@ -56,7 +54,7 @@ class EmbeddedRepositoryServiceTest {
                 Mockito.any(SqlParameterSource.class),
                 Mockito.any(RowMapper.class)))
                 .thenReturn(new ArrayList());
-        Optional<AccountInfo> accountInfo = embeddedRepositoryService.fetchAccountInfo(1234L);
+        Optional<AccountInfo> accountInfo = embeddedRepositoryServiceImpl.fetchAccountInfo(1234L);
         Assertions.assertTrue(accountInfo.isEmpty());
     }
 
@@ -68,7 +66,7 @@ class EmbeddedRepositoryServiceTest {
                 Mockito.any(SqlParameterSource.class),
                 Mockito.any(RowMapper.class));
         try {
-            embeddedRepositoryService.fetchAccountInfo(1234L);
+            embeddedRepositoryServiceImpl.fetchAccountInfo(1234L);
         } catch (CustomBusinessException e) {
             Assertions.assertEquals(500, e.getHttpStatus().value());
             Assertions.assertEquals("Something went wrong, please try again or contact our support team.", e.getMessage());
@@ -82,7 +80,7 @@ class EmbeddedRepositoryServiceTest {
                 Mockito.eq(FETCH_ALL_ACCOUNT_DETAILS),
                 Mockito.any(RowMapper.class)))
                 .thenReturn(Collections.singletonList(TestSupportUtils.getOptionalAccountInfo().get()));
-        List<AccountInfo> accountInfoList = embeddedRepositoryService.fetchAllAccountInfo();
+        List<AccountInfo> accountInfoList = embeddedRepositoryServiceImpl.fetchAllAccountInfo();
         Assertions.assertFalse(accountInfoList.isEmpty());
         Assertions.assertEquals(1, accountInfoList.size());
     }
@@ -94,7 +92,7 @@ class EmbeddedRepositoryServiceTest {
                 Mockito.eq(FETCH_ALL_ACCOUNT_DETAILS),
                 Mockito.any(RowMapper.class));
         try {
-            embeddedRepositoryService.fetchAllAccountInfo();
+            embeddedRepositoryServiceImpl.fetchAllAccountInfo();
         } catch (CustomBusinessException e) {
             Assertions.assertEquals(500, e.getHttpStatus().value());
             Assertions.assertEquals("Something went wrong, please try again or contact our support team.", e.getMessage());
@@ -110,7 +108,7 @@ class EmbeddedRepositoryServiceTest {
                 Mockito.any(RowMapper.class)))
                 .thenReturn(TestSupportUtils.getTransactionInfoList());
 
-        List<TransactionInfo> transactionInfoList = embeddedRepositoryService.fetchMiniStatementByAccountId(1234L);
+        List<TransactionInfo> transactionInfoList = embeddedRepositoryServiceImpl.fetchMiniStatementByAccountId(1234L);
         Assertions.assertFalse(transactionInfoList.isEmpty());
         Assertions.assertEquals(3, transactionInfoList.size());
     }
@@ -122,7 +120,7 @@ class EmbeddedRepositoryServiceTest {
                 Mockito.any(SqlParameterSource.class)))
                 .thenReturn(1);
 
-        embeddedRepositoryService.insertIdempotencyKey("idem-key");
+        embeddedRepositoryServiceImpl.insertIdempotencyKey("idem-key");
     }
 
     @Test
@@ -132,7 +130,7 @@ class EmbeddedRepositoryServiceTest {
                 Mockito.eq(INSERT_IDEMPOTENCY_KEY),
                 Mockito.any(SqlParameterSource.class));
         try {
-            embeddedRepositoryService.insertIdempotencyKey("idem-key");
+            embeddedRepositoryServiceImpl.insertIdempotencyKey("idem-key");
         } catch (CustomBusinessException e) {
             Assertions.assertEquals(500, e.getHttpStatus().value());
             Assertions.assertEquals("Something went wrong, please try again or contact our support team.", e.getMessage());
@@ -147,7 +145,7 @@ class EmbeddedRepositoryServiceTest {
                 Mockito.eq(INSERT_IDEMPOTENCY_KEY),
                 Mockito.any(SqlParameterSource.class));
         try {
-            embeddedRepositoryService.insertIdempotencyKey("idem-key");
+            embeddedRepositoryServiceImpl.insertIdempotencyKey("idem-key");
         } catch (CustomBusinessException e) {
             Assertions.assertEquals(400, e.getHttpStatus().value());
             Assertions.assertEquals("Duplicate Idempotency-Key, please try again with a new key.", e.getMessage());
@@ -162,7 +160,7 @@ class EmbeddedRepositoryServiceTest {
                 Mockito.any(SqlParameterSource.class)))
                 .thenReturn(1);
 
-        embeddedRepositoryService.saveTransactionDetails(
+        embeddedRepositoryServiceImpl.saveTransactionDetails(
                 TestSupportUtils.getTransactionInfoList().get(0));
 
         Mockito.verify(namedParameterJdbcTemplate, Mockito.times(1)).update(
@@ -177,7 +175,7 @@ class EmbeddedRepositoryServiceTest {
                 Mockito.any(SqlParameterSource.class)))
                 .thenReturn(1);
 
-        embeddedRepositoryService.updateBalanceInfo(1234L, new BigDecimal(100));
+        embeddedRepositoryServiceImpl.updateBalanceInfo(1234L, new BigDecimal(100));
 
         Mockito.verify(namedParameterJdbcTemplate, Mockito.times(1)).update(
                 Mockito.eq(UPDATE_ACCOUNT_BALANCE),

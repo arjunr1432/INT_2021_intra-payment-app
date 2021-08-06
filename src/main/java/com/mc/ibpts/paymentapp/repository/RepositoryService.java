@@ -16,9 +16,14 @@ public interface RepositoryService {
     public Optional<AccountInfo> fetchAccountInfo(Long accountId);
 
     /** The method will return the entire account details in the persistence storage.
-     * The response will be a list of account informations.
+     * The response will be a list of account information.
      * */
     public List<AccountInfo> fetchAllAccountInfo();
+
+    /** The method will return the entire transaction details in the persistence storage.
+     * The response will be a list of transaction information.
+     * */
+    public List<TransactionInfo> fetchAllTransactionInfo();
 
     /** This method will return transaction details of a particular account_id
      * limited to maximum 20 transactions.

@@ -3,7 +3,7 @@ package com.mc.ibpts.paymentapp.repository;
 import com.mc.ibpts.paymentapp.dvo.AccountInfo;
 import com.mc.ibpts.paymentapp.dvo.TransactionInfo;
 import com.mc.ibpts.paymentapp.exception.CustomBusinessException;
-import com.mc.ibpts.paymentapp.repository.utils.RepositoryServiceUtils;
+import com.mc.ibpts.paymentapp.repository.utils.SQLRepositoryServiceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -19,17 +19,18 @@ import static com.mc.ibpts.paymentapp.repository.utils.RowMapperUtils.ACCOUNT_IN
 import static com.mc.ibpts.paymentapp.repository.utils.RowMapperUtils.TRANSACTION_INFO_ROW_MAPPER;
 
 @Repository
-public class EmbeddedRepositoryService extends RepositoryServiceUtils implements RepositoryService  {
+public class EmbeddedSQLRepositoryServiceImpl extends SQLRepositoryServiceUtils implements RepositoryService  {
 
     public static final String FETCH_ACCOUNT_DETAILS_BY_ID = "select * from accounts where account_id=:account_id";
     public static final String FETCH_ALL_ACCOUNT_DETAILS = "select * from accounts";
+    public static final String FETCH_ALL_TRANSACTION_DETAILS = "select * from transactions";
     public static final String FETCH_ACCOUNT_TRANSACTION_DETAILS = "select * from transactions where (sender_account_id=:account_id OR receiver_account_id=:account_id) order by transaction_date desc limit 20";
     public static final String UPDATE_ACCOUNT_BALANCE = "update accounts set balance = balance + :amount_to_add where account_id=:account_id";
     public static final String INSERT_TRANSACTION_DETAILS = "insert into transactions (sender_account_id, receiver_account_id, amount, currency, transaction_date, reference_id) values (:sender_account_id, :receiver_account_id, :amount, :currency, :transaction_date, :reference_id)";
     public static final String INSERT_IDEMPOTENCY_KEY = "insert into idempotency (idempotency_key) values (:idempotency_key)";
 
     @Autowired
-    public EmbeddedRepositoryService(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public EmbeddedSQLRepositoryServiceImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         super(namedParameterJdbcTemplate);
     }
 
@@ -44,6 +45,11 @@ public class EmbeddedRepositoryService extends RepositoryServiceUtils implements
     @Override
     public List<AccountInfo> fetchAllAccountInfo() {
         return fetch(FETCH_ALL_ACCOUNT_DETAILS, null, ACCOUNT_INFO_ROW_MAPPER);
+    }
+
+    @Override
+    public List<TransactionInfo> fetchAllTransactionInfo() {
+        return fetch(FETCH_ALL_TRANSACTION_DETAILS, null, TRANSACTION_INFO_ROW_MAPPER);
     }
 
     @Override

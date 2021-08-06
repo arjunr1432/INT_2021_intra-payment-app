@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -26,13 +27,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AccountsV1Service implements V1ApiDelegate {
 
-    private final RepositoryService embeddedRepositoryService;
+    private final RepositoryService cachedRepositoryServiceImpl;
 
     public ResponseEntity<AccountBalanceResponse> v1AccountsAccountIdBalanceGet(String accountId) {
         AtomicReference<AccountBalanceResponse> accountBalanceResponse = new AtomicReference<>();
-        embeddedRepositoryService.fetchAccountInfo(Long.valueOf(accountId)).ifPresentOrElse(
+        cachedRepositoryServiceImpl.fetchAccountInfo(Long.valueOf(accountId)).ifPresentOrElse(
                 (accountInfo) -> {
-                    log.info("Fetched account details from database.");
+                    log.info("Fetched account details from persistence.");
                     accountBalanceResponse.set(
                             RequestResponseMapper.ACCOUNT_INFO_TO_ACCOUNT_BALANCE_DETAILS_RESPONSE.apply(accountInfo));
                 },
@@ -51,10 +52,10 @@ public class AccountsV1Service implements V1ApiDelegate {
     public ResponseEntity<List<AccountStatementResponseData>> v1AccountsAccountIdStatementsMiniGet(String accountId) {
         AtomicReference<List<AccountStatementResponseData>> statementResponseData = new AtomicReference<>();
         /* Checking if account is available or not.*/
-        embeddedRepositoryService.fetchAccountInfo(Long.valueOf(accountId)).ifPresentOrElse(
+        cachedRepositoryServiceImpl.fetchAccountInfo(Long.valueOf(accountId)).ifPresentOrElse(
                 (accountInfo) -> {
-                    log.info("Fetched transaction details from database.");
-                    List<TransactionInfo> list = embeddedRepositoryService.fetchMiniStatementByAccountId(
+                    log.info("Fetched transaction details from persistence.");
+                    List<TransactionInfo> list = cachedRepositoryServiceImpl.fetchMiniStatementByAccountId(
                             Long.valueOf(accountId));
                     if (CollectionUtils.isEmpty(list)) {
                         log.warn("No transactions exists for the account.");
@@ -62,6 +63,7 @@ public class AccountsV1Service implements V1ApiDelegate {
                                 HttpStatus.OK,
                                 "No Transaction statement for the account.");
                     } else {
+                        Collections.sort(list);
                         statementResponseData.set(list.stream().peek(transactionInfo -> {
                             if (transactionInfo.getSenderAccountId().equals(Long.valueOf(accountId))) {
                                 transactionInfo.setType("DEBIT");
@@ -85,7 +87,7 @@ public class AccountsV1Service implements V1ApiDelegate {
 
 
     public ResponseEntity<List<AccountDetailsResponseData>> v1AccountsGet() {
-        List<AccountDetailsResponseData> accountDetailsResponseData = embeddedRepositoryService.fetchAllAccountInfo()
+        List<AccountDetailsResponseData> accountDetailsResponseData = cachedRepositoryServiceImpl.fetchAllAccountInfo()
                 .stream().map(RequestResponseMapper.ACCOUNT_INFO_TO_ACCOUNT_DETAILS_RESPONSE).collect(Collectors.toList());
         log.info("Successfully retrieved account details with {} no of records.", accountDetailsResponseData.size());
         return new ResponseEntity<>(accountDetailsResponseData, HttpStatus.OK);
@@ -96,7 +98,7 @@ public class AccountsV1Service implements V1ApiDelegate {
     public ResponseEntity<PaymentTransferResponse> v1PaymentsTransferPost(
             String idempotencyKey, PaymentTransferRequest paymentTransferRequest) {
         /* Ensuring Idempotency of the request. */
-        embeddedRepositoryService.insertIdempotencyKey(idempotencyKey);
+        cachedRepositoryServiceImpl.insertIdempotencyKey(idempotencyKey);
 
         /* Validate sender and receiver account_id and balance info */
         validateAccountAndBalanceInfo(paymentTransferRequest);
@@ -118,13 +120,13 @@ public class AccountsV1Service implements V1ApiDelegate {
         transactionInfo.setCurrency(paymentTransferRequest.getCurrency().getValue());
         transactionInfo.setReferenceId(MDC.get("requestID"));
         transactionInfo.setTransactionDate(LocalDateTime.now());
-        embeddedRepositoryService.saveTransactionDetails(transactionInfo);
+        cachedRepositoryServiceImpl.saveTransactionDetails(transactionInfo);
 
         /* Updating balance details for sender and receiver.*/
-        embeddedRepositoryService.updateBalanceInfo(
+        cachedRepositoryServiceImpl.updateBalanceInfo(
                 paymentTransferRequest.getSenderAccountId(),
                 new BigDecimal(paymentTransferRequest.getAmount()).negate());
-        embeddedRepositoryService.updateBalanceInfo(
+        cachedRepositoryServiceImpl.updateBalanceInfo(
                 paymentTransferRequest.getReceiverAccountId(),
                 new BigDecimal(paymentTransferRequest.getAmount()));
 
@@ -133,9 +135,9 @@ public class AccountsV1Service implements V1ApiDelegate {
 
     private void validateAccountAndBalanceInfo(PaymentTransferRequest paymentTransferRequest) {
         /* Sender related validations.*/
-        embeddedRepositoryService.fetchAccountInfo(paymentTransferRequest.getSenderAccountId()).ifPresentOrElse(
+        cachedRepositoryServiceImpl.fetchAccountInfo(paymentTransferRequest.getSenderAccountId()).ifPresentOrElse(
                 (accountInfo) -> {
-                    log.info("Fetched Sender account details from database.");
+                    log.info("Fetched Sender account details from persistence.");
                     /* Checking if account is operational or not*/
                     if (accountInfo.getAccountStatus().equals("DELETED")) {
                         log.error("Sender's account is in Deleted status, not able to perform the transaction.");
@@ -171,9 +173,9 @@ public class AccountsV1Service implements V1ApiDelegate {
         );
 
         /* Receiver related validations. */
-        embeddedRepositoryService.fetchAccountInfo(paymentTransferRequest.getReceiverAccountId()).ifPresentOrElse(
+        cachedRepositoryServiceImpl.fetchAccountInfo(paymentTransferRequest.getReceiverAccountId()).ifPresentOrElse(
                 (accountInfo) -> {
-                    log.info("Fetched Receiver account details from database.");
+                    log.info("Fetched Receiver account details from persistence.");
                     /* Checking if account is operational or not*/
                     if (accountInfo.getAccountStatus().equals("DELETED")) {
                         log.error("Receiver's account is in Deleted status, not able to perform the transaction.");
