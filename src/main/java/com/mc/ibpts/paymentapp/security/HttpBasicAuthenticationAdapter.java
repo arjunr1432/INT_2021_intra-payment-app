@@ -13,9 +13,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 public class HttpBasicAuthenticationAdapter extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private RestAccessDeniedHandler restAccessDeniedHandler;
-
-    @Autowired
     private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
     @Value("${basic.auth.username}")
@@ -35,7 +32,7 @@ public class HttpBasicAuthenticationAdapter extends WebSecurityConfigurerAdapter
                 .authorizeRequests()
                 .antMatchers("/info").permitAll()
                 .anyRequest().authenticated()
-                .and().exceptionHandling().accessDeniedHandler(restAccessDeniedHandler)
+                .and().exceptionHandling()
                 .authenticationEntryPoint(restAuthenticationEntryPoint)
                 .and().httpBasic().realmName("Assignment Project");
     }

@@ -47,14 +47,6 @@ public class ErrorControllerAdvice {
 		return createResponse(HttpStatus.BAD_REQUEST, errorStackBuilder.toString());
 	}
 
-	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
-	public ResponseEntity<ErrorResponse> handleException(
-			MethodArgumentTypeMismatchException e, HttpServletRequest request) {
-		logExceptionTrace(e, request);
-		return createResponse(HttpStatus.BAD_REQUEST,
-				String.format("Parameter '%s', %s", e.getName(), e.getMessage()));
-	}
-
 	@ExceptionHandler(NoHandlerFoundException.class)
 	public ResponseEntity<ErrorResponse> handleException(
 			NoHandlerFoundException e, HttpServletRequest request) {

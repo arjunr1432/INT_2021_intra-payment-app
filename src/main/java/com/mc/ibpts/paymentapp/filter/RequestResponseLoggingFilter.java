@@ -25,11 +25,10 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
         MDC.put("requestID", UUID.randomUUID().toString());
         httpServletResponse.addHeader("Request-Id", MDC.get("requestID"));
         filterChain.doFilter(httpServletRequest, httpServletResponse);
-        log.info("Service responded : RequestURL={}, Method={}, ApiResponse={}, ReferenceId={}, ResponseTime={}ms",
+        log.info("Service responded : RequestURL={}, Method={}, ApiResponse={}, ResponseTime={}ms",
                 httpServletRequest.getRequestURI(),
                 httpServletRequest.getMethod(),
                 httpServletResponse.getStatus(),
-                MDC.get("requestID"),
                 stopWatch.stop().elapsed(TimeUnit.MILLISECONDS));
     }
 }
