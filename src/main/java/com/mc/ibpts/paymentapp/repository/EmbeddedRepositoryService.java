@@ -9,9 +9,9 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,12 +21,12 @@ import static com.mc.ibpts.paymentapp.repository.utils.RowMapperUtils.TRANSACTIO
 @Repository
 public class EmbeddedRepositoryService extends RepositoryServiceUtils implements RepositoryService  {
 
-    private static final String FETCH_ACCOUNT_DETAILS_BY_ID = "select * from accounts where account_id=:account_id";
-    private static final String FETCH_ALL_ACCOUNT_DETAILS = "select * from accounts";
-    private static final String FETCH_ACCOUNT_TRANSACTION_DETAILS = "select * from transactions where (sender_account_id=:account_id OR receiver_account_id=:account_id) order by transaction_date desc limit 20";
-    private static final String UPDATE_ACCOUNT_BALANCE = "update accounts set balance = balance + :amount_to_add where account_id=:account_id";
-    private static final String INSERT_TRANSACTION_DETAILS = "insert into transactions (sender_account_id, receiver_account_id, amount, currency, transaction_date, reference_id) values (:sender_account_id, :receiver_account_id, :amount, :currency, :transaction_date, :reference_id)";
-    private static final String INSERT_IDEMPOTENCY_KEY = "insert into idempotency (idempotency_key) values (:idempotency_key)";
+    public static final String FETCH_ACCOUNT_DETAILS_BY_ID = "select * from accounts where account_id=:account_id";
+    public static final String FETCH_ALL_ACCOUNT_DETAILS = "select * from accounts";
+    public static final String FETCH_ACCOUNT_TRANSACTION_DETAILS = "select * from transactions where (sender_account_id=:account_id OR receiver_account_id=:account_id) order by transaction_date desc limit 20";
+    public static final String UPDATE_ACCOUNT_BALANCE = "update accounts set balance = balance + :amount_to_add where account_id=:account_id";
+    public static final String INSERT_TRANSACTION_DETAILS = "insert into transactions (sender_account_id, receiver_account_id, amount, currency, transaction_date, reference_id) values (:sender_account_id, :receiver_account_id, :amount, :currency, :transaction_date, :reference_id)";
+    public static final String INSERT_IDEMPOTENCY_KEY = "insert into idempotency (idempotency_key) values (:idempotency_key)";
 
     @Autowired
     public EmbeddedRepositoryService(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
@@ -85,7 +85,7 @@ public class EmbeddedRepositoryService extends RepositoryServiceUtils implements
     }
 
     @Override
-    public void updateBalanceInfo(Long accountId, Double amountToAdd) {
+    public void updateBalanceInfo(Long accountId, BigDecimal amountToAdd) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("account_id", accountId);
         sqlParameterSource.addValue("amount_to_add", amountToAdd);

@@ -3,7 +3,6 @@ package com.mc.ibpts.paymentapp.repository.utils;
 import com.mc.ibpts.paymentapp.exception.CustomBusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -22,20 +21,6 @@ public class RepositoryServiceUtils {
     private static final String DATABASE_ERROR_RESPONSE_MESSAGE = "Something went wrong, please try again or contact our support team.";
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
-    protected Long insert(String sql, SqlParameterSource sqlParameterSource) {
-        try {
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-            namedParameterJdbcTemplate.update(sql, sqlParameterSource, keyHolder, new String[]{"ID"});
-            return Objects.requireNonNull(keyHolder.getKey()).longValue();
-        } catch (Exception e) {
-            log.error(DATABASE_ERROR_LOG_TRACE_MESSAGE, e.getMessage());
-            throw new CustomBusinessException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    DATABASE_ERROR_RESPONSE_MESSAGE,
-                    e);
-        }
-    }
 
     protected int upsert(String sql, SqlParameterSource sqlParameterSource) {
         try {

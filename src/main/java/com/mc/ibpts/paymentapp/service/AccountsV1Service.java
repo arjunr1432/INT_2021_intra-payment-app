@@ -6,9 +6,9 @@ import com.mc.ibpts.paymentapp.dvo.TransactionInfo;
 import com.mc.ibpts.paymentapp.exception.CustomBusinessException;
 import com.mc.ibpts.paymentapp.repository.RepositoryService;
 import com.mc.ibpts.paymentapp.utils.RequestResponseMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -23,10 +23,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AccountsV1Service implements V1ApiDelegate {
 
-    @Autowired
-    private RepositoryService embeddedRepositoryService;
+    private final RepositoryService embeddedRepositoryService;
 
     public ResponseEntity<AccountBalanceResponse> v1AccountsAccountIdBalanceGet(String accountId) {
         AtomicReference<AccountBalanceResponse> accountBalanceResponse = new AtomicReference<>();
@@ -80,7 +80,7 @@ public class AccountsV1Service implements V1ApiDelegate {
         );
         log.info("Successfully retrieved mini account statement details for account_id={} with {} no of records.",
                 accountId, statementResponseData.get().size());
-        return new ResponseEntity<>(statementResponseData.get(), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(statementResponseData.get(), HttpStatus.OK);
     }
 
 
@@ -123,10 +123,10 @@ public class AccountsV1Service implements V1ApiDelegate {
         /* Updating balance details for sender and receiver.*/
         embeddedRepositoryService.updateBalanceInfo(
                 paymentTransferRequest.getSenderAccountId(),
-                -Double.parseDouble(paymentTransferRequest.getAmount()));
+                new BigDecimal(paymentTransferRequest.getAmount()).negate());
         embeddedRepositoryService.updateBalanceInfo(
                 paymentTransferRequest.getReceiverAccountId(),
-                Double.parseDouble(paymentTransferRequest.getAmount()));
+                new BigDecimal(paymentTransferRequest.getAmount()));
 
         return transactionInfo;
     }
@@ -144,7 +144,7 @@ public class AccountsV1Service implements V1ApiDelegate {
                                 "Sender's account is in Deleted status, not able to perform the transaction.");
                     }
                     /* Checking if sufficient balance or not.*/
-                    if (accountInfo.getBalance() < Double.parseDouble(paymentTransferRequest.getAmount())) {
+                    if (accountInfo.getBalance().doubleValue() < new BigDecimal(paymentTransferRequest.getAmount()).doubleValue()) {
                         log.error("Not enough balance for transaction. availableBalance={}, requiredAmout={}",
                                 accountInfo.getBalance(),
                                 paymentTransferRequest.getAmount());
@@ -204,6 +204,7 @@ public class AccountsV1Service implements V1ApiDelegate {
             log.error("Sending between same account numbers not allowed.");
             throw new CustomBusinessException(
                     HttpStatus.BAD_REQUEST,
-                    "Sending between same account numbers not permitted.");        }
+                    "Sending between same account numbers not permitted.");
+        }
     }
 }

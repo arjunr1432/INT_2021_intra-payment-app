@@ -3,6 +3,7 @@ package com.mc.ibpts.paymentapp.repository;
 import com.mc.ibpts.paymentapp.dvo.AccountInfo;
 import com.mc.ibpts.paymentapp.dvo.TransactionInfo;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,5 +40,5 @@ public interface RepositoryService {
      * if amountToAdd is +ve, the balance will be incremented and
      * if amountToAdd is -ve, the balance will bew decremented.
      * */
-    void updateBalanceInfo(Long accountId, Double amountToAdd);
+    void updateBalanceInfo(Long accountId, BigDecimal amountToAdd);
 }

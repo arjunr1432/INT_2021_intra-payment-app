@@ -12,7 +12,7 @@ public class RowMapperUtils {
     public static final RowMapper<AccountInfo> ACCOUNT_INFO_ROW_MAPPER = (resultSet, i) -> {
         AccountInfo accountInfo = new AccountInfo();
         accountInfo.setAccountId(resultSet.getLong("account_id"));
-        accountInfo.setBalance(resultSet.getDouble("balance"));
+        accountInfo.setBalance(resultSet.getBigDecimal("balance"));
         accountInfo.setCurrency(resultSet.getString("currency"));
         accountInfo.setAccountStatus(resultSet.getString("account_status"));
         return accountInfo;
