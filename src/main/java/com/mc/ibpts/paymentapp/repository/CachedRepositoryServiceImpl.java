@@ -116,6 +116,7 @@ public class CachedRepositoryServiceImpl extends CacheRepositoryServiceUtils imp
                 .filter(transactionInfo ->
                         transactionInfo.getSenderAccountId().equals(accountId) ||
                                 transactionInfo.getReceiverAccountId().equals(accountId))
+                .skip(0).limit(20)      // Limiting the top 20 records.
                 .collect(Collectors.toList());
     }
 
